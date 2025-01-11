@@ -1,0 +1,13 @@
+{
+  "name": "PersonalLogistics",
+  "version_number": "2.11.0",
+  "website_url": "https://DUMMY URL",
+  "description": "Manage inventory by requesting items from or auto-recycling items to logistics stations. Also recycles littered items to logistics network.",
+  "dependencies": [
+    "xiaoye97-LDBTool-3.0.0",
+    "xiaoye97-BepInEx-5.4.17",
+    "CommonAPI-CommonAPI-1.6.5",
+    "CommonAPI-DSPModSave-1.2.0",
+    "nebula-NebulaMultiplayerModApi-2.0.0"
+  ]
+}

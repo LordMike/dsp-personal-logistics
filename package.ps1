@@ -11,7 +11,7 @@ $manifestContent = Get-Content -path .\manifest.json -Raw
 if ($reltype -eq "Debug")
 {
     # mess up manifest so it can't be uploaded to store
-    $manifestContent = Get-Content -path .\manifest.bad.main.json -Raw
+    $manifestContent = Get-Content -path .\manifest.local.json -Raw
 }
 $j = $manifestContent | ConvertFrom-Json
 
@@ -26,20 +26,16 @@ write-host "v = $v"
 if ($vertype -eq "minor")
 {
     $new_version = [version]::New($v.Major, $v.Minor + 1, 0)
-}
-elseif ($vertype -eq "patch")
+} elseif ($vertype -eq "patch")
 {
     $new_version = [version]::New($v.Major, $v.Minor, $v.Build + 1)
-}
-elseif ($vertype -eq "major")
+} elseif ($vertype -eq "major")
 {
     $new_version = [version]::New($v.Major + 1, 0, 0)
-}
-elseif ($vertype -eq "none")
+} elseif ($vertype -eq "none")
 {
     $new_version = [version]::New($v.Major, $v.Minor, $v.Build)
-}
-else
+} else
 {
     Write-Host "invalid vertype: should be (major, minor, patch, none), got $vertype"
     exit
@@ -58,8 +54,7 @@ if ($reltype -eq "Release")
 #    Start-Process dotnet.exe -ArgumentList "build -c Release" -NoNewWindow -Wait
     dotnet build "/property:Configuration=Release"
     Copy-Item -Path bin/Release/net48/PersonalLogistics.dll -Destination tmp_release
-}
-else 
+} else 
 {
 #    Invoke-MsBuild -Path ".\PersonalLogistics.sln" -Params "/target:Build /property:Configuration=Debug"
 #    Start-Process dotnet.exe -ArgumentList "build" -NoNewWindow -Wait
