@@ -7,6 +7,7 @@ using CommonAPI.Systems;
 using crecheng.DSPModSave;
 using HarmonyLib;
 using NebulaAPI;
+using NebulaAPI.Interfaces;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.ModPlayer;
 using PersonalLogistics.Nebula;
@@ -37,7 +38,7 @@ namespace PersonalLogistics
     {
         private const string PluginGuid = "semarware.dysonsphereprogram.PersonalLogistics";
         private const string PluginName = "PersonalLogistics";
-        private const string PluginVersion = "2.9.8";
+        private const string PluginVersion = "2.11.0";
         private const float InventorySyncInterval = 4.5f;
         private static readonly int VERSION = 2;
 
@@ -68,7 +69,11 @@ namespace PersonalLogistics
             _recycleScript = gameObject.AddComponent<RecycleWindow>();
             Asset.Init(PluginGuid, "pui");
             PlogPlayerRegistry.ClearLocal();
-            NebulaLoadState.Register();
+            
+            // Only call when the multiplayer main mod is present
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("dsp.nebula-multiplayer")) 
+                NebulaLoadState.Register();
+            
 #if DEBUG
             gameObject.AddComponent<TestPersistence>();
 #else

@@ -1,7 +1,4 @@
-﻿using System.IO;
-using PersonalLogistics.Logistics;
-using PersonalLogistics.Util;
-using UnityEngine;
+﻿using PersonalLogistics.Logistics;
 
 namespace PersonalLogistics.Nebula.Packets
 {

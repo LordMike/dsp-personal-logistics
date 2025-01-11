@@ -1,5 +1,4 @@
-﻿using NebulaAPI;
-using PersonalLogistics.Model;
+﻿using PersonalLogistics.Model;
 
 namespace PersonalLogistics.Nebula.Packets
 {

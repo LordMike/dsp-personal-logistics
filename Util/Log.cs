@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using BepInEx.Logging;
+using JetBrains.Annotations;
 
 namespace PersonalLogistics.Util
 {
@@ -57,10 +59,10 @@ namespace PersonalLogistics.Util
             }
         }
 
-        public static void Trace(string msg)
+        public static void Trace(string msg, [CallerFilePath] [CanBeNull] string callerFilePath = "", [CallerMemberName] string callerMemberName = "", [CallerLineNumber] int callerLineNumber = 0)
         {
 #if DEBUG
-            logger.LogInfo($"[{DateTime.Now:HH:mm:ss.fff}] {msg}");
+            logger.LogInfo($"[{DateTime.Now:HH:mm:ss.fff}] {msg} ({callerMemberName} @ {callerFilePath}:{callerLineNumber})");
 #endif
         }
     }

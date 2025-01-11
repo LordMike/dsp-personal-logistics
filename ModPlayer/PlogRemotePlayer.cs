@@ -1,12 +1,10 @@
 ﻿using System;
-using NebulaAPI;
+using NebulaAPI.GameState;
 
 namespace PersonalLogistics.ModPlayer
 {
     public class PlogRemotePlayer : PlogPlayer
     {
-        public INebulaPlayer NebulaPlayer;
-
         public PlogRemotePlayer(PlogPlayerId playerId) : base(playerId, true)
         {
         }

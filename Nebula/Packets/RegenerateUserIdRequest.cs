@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using PersonalLogistics.ModPlayer;
+﻿using PersonalLogistics.ModPlayer;
 
 namespace PersonalLogistics.Nebula.Packets
 {

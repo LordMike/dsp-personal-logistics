@@ -1,5 +1,6 @@
 ﻿using System.IO;
-using NebulaAPI;
+using NebulaAPI.Networking;
+using NebulaAPI.Packets;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.Nebula.Packets;
 

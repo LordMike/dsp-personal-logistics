@@ -1,4 +1,4 @@
-﻿using NebulaAPI;
+﻿using NebulaAPI.DataStructures;
 using PersonalLogistics.Model;
 using PersonalLogistics.ModPlayer;
 

@@ -1,4 +1,8 @@
 ﻿using NebulaAPI;
+using NebulaAPI.DataStructures;
+using NebulaAPI.GameState;
+using NebulaAPI.Networking;
+using NebulaAPI.Packets;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.Nebula.Packets;
 using PersonalLogistics.Util;
@@ -13,13 +17,10 @@ namespace PersonalLogistics.Nebula.Host
             if (IsClient)
                 return;
             var (distance, removed, stationInfo) = LogisticsNetwork.RemoveItem(packet.playerUPosition.ToVectorLF3(), packet.playerPosition.ToVector3(), packet.itemId, packet.itemCount);
-            INetworkProvider network = NebulaModAPI.MultiplayerSession.Network;
-            var nebulaPlayer = network.PlayerManager.GetPlayer(conn);
-
             if (stationInfo == null || removed.ItemCount == 0)
             {
                 Log.Warn($"Did not find station to remove items from for player. ItemId: {packet.itemId} {removed.ItemCount}");
-                nebulaPlayer.SendPacket(new RemoveFromNetworkResponse(
+                conn.SendPacket(new RemoveFromNetworkResponse(
                     packet.clientId, 
                     0,
                     packet.requestGuid,
@@ -39,7 +40,7 @@ namespace PersonalLogistics.Nebula.Host
             {
                 warperNeeded = false;
             }
-            nebulaPlayer.SendPacket(new RemoveFromNetworkResponse(
+            conn.SendPacket(new RemoveFromNetworkResponse(
                 packet.clientId, 
                 stationInfo.StationGid,
                 packet.requestGuid,

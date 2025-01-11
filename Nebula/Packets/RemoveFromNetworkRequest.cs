@@ -1,4 +1,4 @@
-﻿using NebulaAPI;
+﻿using NebulaAPI.DataStructures;
 using UnityEngine;
 
 namespace PersonalLogistics.Nebula.Packets
