@@ -7,8 +7,6 @@ using System.Text;
 using System.Timers;
 using PersonalLogistics.Model;
 using PersonalLogistics.ModPlayer;
-using PersonalLogistics.Nebula;
-using PersonalLogistics.Nebula.Client;
 using PersonalLogistics.Shipping;
 using PersonalLogistics.Util;
 using UnityEngine;
@@ -150,11 +148,6 @@ namespace PersonalLogistics.Logistics
                     return;
                 }
 
-                if (NebulaLoadState.IsMultiplayerClient())
-                {
-                    return;
-                }
-
                 CollectStationInfos();
             }
             catch (Exception exc)
@@ -212,20 +205,6 @@ namespace PersonalLogistics.Logistics
                                 {
                                     // for now we're clearing the whole station list
                                     newStations.Add(stationInfo);
-                                }
-
-                                // need to send notify for a client who hasn't seen station yet
-                                // even if it didn't change
-                                if (NebulaLoadState.IsMultiplayerHost() && (changed || notifyAllClients))
-                                {
-                                    RequestClient.NotifyStationInfo(stationInfo);
-                                }
-                                else
-                                {
-                                    if (!changed && NebulaLoadState.IsMultiplayerHost())
-                                    {
-                                        Trace($"Station {stationInfo.StationGid} {station.gid} did not change");
-                                    }
                                 }
 
                                 foreach (var productInfo in stationInfo.Products)
@@ -297,10 +276,6 @@ namespace PersonalLogistics.Logistics
                 foreach (var itemId in newByItemSummary.Keys)
                 {
                     byItemSummary.TryAdd(itemId, newByItemSummary[itemId]);
-                    if (NebulaLoadState.IsMultiplayerHost())
-                    {
-                        RequestClient.SendByItemUpdate(itemId, newByItemSummary[itemId]);
-                    }
                 }
 
                 IsRunning = false;
@@ -479,13 +454,6 @@ namespace PersonalLogistics.Logistics
         /// </summary>
         public static ItemStack AddItem(VectorLF3 playerUPosition, int itemId, ItemStack amountToAdd)
         {
-            if (NebulaLoadState.IsMultiplayerClient())
-            {
-                Debug($"Sending items {itemId} to host for recycle");
-                RequestClient.SendRemoteAddItemRequest(playerUPosition, itemId, amountToAdd);
-                // return empty, basically clearing full buffer. host will send back what we don't successfully add
-                return ItemStack.Empty();
-            }
             var stationsWithItem = stations.FindAll(s => s.HasItem(itemId));
             stationsWithItem.Sort((s1, s2) =>
             {

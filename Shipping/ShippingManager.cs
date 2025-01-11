@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NebulaAPI;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.Model;
 using PersonalLogistics.ModPlayer;
-using PersonalLogistics.Nebula.Packets;
 using PersonalLogistics.SerDe;
 using PersonalLogistics.Util;
 using UnityEngine;
@@ -612,87 +610,5 @@ namespace PersonalLogistics.Shipping
             _itemBuffer.Clear();
         }
 #endif
-        public void AddRemoteRequest(VectorLF3 playerUPosition, Vector3 playerPosition, ItemRequest itemRequest)
-        {
-            var shipCapacity = GameMain.history.logisticShipCarries;
-            var ramount = Math.Max(itemRequest.ItemCount, shipCapacity);
-            if (shipCapacity < itemRequest.ItemCount)
-            {
-                // special case that can happen for Foundation that has stack size of 1k, but unresearched vessels can carry only 200 
-                ramount = shipCapacity;
-            }
-
-            NebulaModAPI.MultiplayerSession.Network.SendPacket(new RemoveFromNetworkRequest(PlogPlayerRegistry.LocalPlayer().playerId.ToString(),
-                itemRequest.guid.ToString(), playerUPosition, playerPosition, itemRequest.ItemId, ramount));
-        }
-
-        public void CompleteRemoteRequestRemove(RemoveFromNetworkResponse packet)
-        {
-            var itemRequest = GetPlayer().personalLogisticManager.GetRequests().Find(r => r.guid == Guid.Parse(packet.requestGuid));
-            if (itemRequest == null)
-            {
-                Warn($"Did not find original request. {packet.requestGuid} {packet.distance}");
-                return;
-            }
-
-            if (packet.removedCount == 0)
-            {
-                Warn($"Host told us that the item could not be found {itemRequest.ItemName}");
-                itemRequest.State = RequestState.Failed;
-                return;
-            }
-
-            var stationInfo = LogisticsNetwork.FindStation(packet.stationGid, packet.planetId, packet.stationId);
-
-            itemRequest.ComputedCompletionTime = ShippingCostCalculator.CalculateArrivalTime(packet.distance, stationInfo);
-            var totalSeconds = (itemRequest.ComputedCompletionTime - DateTime.Now).TotalSeconds;
-            itemRequest.ComputedCompletionTick = GameMain.gameTick + TimeUtil.GetGameTicksFromSeconds(Mathf.CeilToInt((float)totalSeconds));
-            var itemStack = ItemStack.FromCountAndPoints(packet.removedCount, packet.removedAcc);
-            if (totalSeconds > PluginConfig.maxWaitTimeInSeconds.Value)
-            {
-                LogPopupWithFrequency("Item: {0} arrival time is {1} seconds in future (more than configurable threshold of {2}), canceling request",
-                    itemRequest.ItemName, totalSeconds, PluginConfig.maxWaitTimeInSeconds.Value);
-                    LogisticsNetwork.AddItem(PlogPlayerRegistry.LocalPlayer().GetPosition().clusterPosition, itemRequest.ItemId,
-                        itemStack); 
-                itemRequest.State = RequestState.Failed;
-            }
-
-            var addToBuffer = AddToBuffer(itemRequest.ItemId, itemStack);
-            var actualBufferedItemCount = GetActualBufferedItemCount(itemRequest.ItemId);
-            Debug($"Added {packet.removedCount}, {packet.removedAcc} of item to buffer {actualBufferedItemCount}");
-            if (!addToBuffer)
-            {
-                Warn($"Failed to add inbound items to storage buffer {itemRequest.ItemId} {itemRequest.State}");
-                LogisticsNetwork.AddItem(PlogPlayerRegistry.LocalPlayer().GetPosition().clusterPosition, itemRequest.ItemId, itemStack);
-                return;
-            }
-
-            if (itemRequest.ItemId == DEBUG_ITEM_ID)
-            {
-                Debug(
-                    $"arrival time for {itemRequest.ItemId} is {itemRequest.ComputedCompletionTime} {ItemUtil.GetItemName(itemRequest.ItemId)} ticks {itemRequest.ComputedCompletionTick - GameMain.gameTick}");
-            }
-            // update task to reflect amount that we actually have
-            itemRequest.ItemCount = Math.Min(packet.removedCount, itemRequest.ItemCount);
-            _requests?.Enqueue(itemRequest);
-            _requestByGuid[itemRequest.guid] = itemRequest;
-            var cost = new Cost
-            {
-                energyCost = packet.tripEnergyCost * 2,
-                needWarper = packet.warperNeeded,
-                planetId = packet.planetId,
-                stationId = packet.stationId,
-                shippingToBufferCount = packet.removedCount
-            };
-            _costs.Add(itemRequest.guid, cost);
-            itemRequest.State = RequestState.WaitingForShipping;
-        }
-
-        public void CompleteRemoteAdd(AddToNetworkResponse packet)
-        {
-            Debug($"Completing remote add of {packet.itemId}. {packet.remainingCount} items remain after doing add");
-            var remainingAmount = ItemStack.FromCountAndPoints(packet.remainingCount, packet.remainingProliferatorPoints);
-            _itemBuffer.Add(packet.itemId, remainingAmount, true);           
-        }
     }
 }

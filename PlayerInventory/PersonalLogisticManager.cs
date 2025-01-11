@@ -5,7 +5,6 @@ using System.Linq;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.Model;
 using PersonalLogistics.ModPlayer;
-using PersonalLogistics.Nebula;
 using PersonalLogistics.Scripts;
 using PersonalLogistics.SerDe;
 using PersonalLogistics.Util;
@@ -150,7 +149,8 @@ namespace PersonalLogistics.PlayerInventory
                     }
 
                     itemRequest.State = RequestState.ReadyForInventoryUpdate;
-                    _inventoryActions.Add(new PlayerInventoryAction(itemRequest.ItemId, itemRequest.ItemCount, PlayerInventoryActionType.Remove, itemRequest));
+                    _inventoryActions.Add(new PlayerInventoryAction(itemRequest.ItemId, itemRequest.ItemCount,
+                        PlayerInventoryActionType.Remove, itemRequest));
                     break;
                 }
 
@@ -179,7 +179,8 @@ namespace PersonalLogistics.PlayerInventory
             {
                 case RequestState.Created:
                 {
-                    if (stationRequestMode.Value == StationSourceMode.Planetary && planetarySourceMode.Value == PlanetarySourceMode.OnlyLocallyAvailable)
+                    if (stationRequestMode.Value == StationSourceMode.Planetary &&
+                        planetarySourceMode.Value == PlanetarySourceMode.OnlyLocallyAvailable)
                     {
                         if (!LogisticsNetwork.IsAvailableLocally(itemRequest.ItemId))
                         {
@@ -189,7 +190,9 @@ namespace PersonalLogistics.PlayerInventory
                         }
                     }
 
-                    var removedCount = itemRequest.fillBufferRequest ? ItemStack.Empty() : GetPlayer().shippingManager.RemoveFromBuffer(itemRequest.ItemId, itemRequest.ItemCount);
+                    var removedCount = itemRequest.fillBufferRequest
+                        ? ItemStack.Empty()
+                        : GetPlayer().shippingManager.RemoveFromBuffer(itemRequest.ItemId, itemRequest.ItemCount);
                     if (removedCount.ItemCount > 0)
                     {
                         itemRequest.ComputedCompletionTick = GameMain.gameTick;
@@ -215,11 +218,12 @@ namespace PersonalLogistics.PlayerInventory
                         }
                     }
 
-                    if (!LogisticsNetwork.HasItem(itemRequest.ItemId) && !NebulaLoadState.IsMultiplayerClient())
+                    if (!LogisticsNetwork.HasItem(itemRequest.ItemId))
                     {
                         if (itemRequest.ItemId == DEBUG_ITEM_ID)
                         {
-                            Debug($"No stations with {ItemUtil.GetItemName(itemRequest.ItemId)} found, marking request as failed");
+                            Debug(
+                                $"No stations with {ItemUtil.GetItemName(itemRequest.ItemId)} found, marking request as failed");
                         }
 
                         itemRequest.State = RequestState.Failed;
@@ -230,11 +234,6 @@ namespace PersonalLogistics.PlayerInventory
                     if (GetPlayer().shippingManager.AddRequest(_player.uPosition, _player.position, itemRequest))
                     {
                         itemRequest.State = RequestState.WaitingForShipping;
-                    }
-                    else if (NebulaLoadState.IsMultiplayerClient())
-                    {
-                        GetPlayer().shippingManager.AddRemoteRequest(_player.uPosition, _player.position, itemRequest);
-                        itemRequest.State = RequestState.WaitingForHost;
                     }
                     else
                     {
@@ -257,20 +256,24 @@ namespace PersonalLogistics.PlayerInventory
                         GetPlayer().shippingManager.MarkItemRequestFailed(itemRequest.guid);
                         return true;
                     }
+
                     return false;
                 }
                 case RequestState.WaitingForShipping:
                 {
                     if (GetPlayer().shippingManager.ItemForTaskArrived(itemRequest.guid))
                     {
-                        itemRequest.State = itemRequest.fillBufferRequest ? RequestState.Complete : RequestState.ReadyForInventoryUpdate;
+                        itemRequest.State = itemRequest.fillBufferRequest
+                            ? RequestState.Complete
+                            : RequestState.ReadyForInventoryUpdate;
                     }
 
                     break;
                 }
                 case RequestState.ReadyForInventoryUpdate:
                 {
-                    var action = new PlayerInventoryAction(itemRequest.ItemId, itemRequest.ItemCount, PlayerInventoryActionType.Add, itemRequest);
+                    var action = new PlayerInventoryAction(itemRequest.ItemId, itemRequest.ItemCount,
+                        PlayerInventoryActionType.Add, itemRequest);
                     _inventoryActions.Add(action);
                     if (itemRequest.ItemId == DEBUG_ITEM_ID)
                     {
@@ -387,7 +390,8 @@ namespace PersonalLogistics.PlayerInventory
             }
             catch (Exception e)
             {
-                Warn($"Got exception while processing tasks. Swallowing, but this should be checked out {e.Message} {e.StackTrace}");
+                Warn(
+                    $"Got exception while processing tasks. Swallowing, but this should be checked out {e.Message} {e.StackTrace}");
             }
         }
 
@@ -460,7 +464,8 @@ namespace PersonalLogistics.PlayerInventory
                     }
                     else
                     {
-                        Warn($"failed to player inventory actual item req with actual from PLM. {playerInventoryAction.Request}");
+                        Warn(
+                            $"failed to player inventory actual item req with actual from PLM. {playerInventoryAction.Request}");
                     }
 
                     _inventoryActions.Add(playerInventoryAction);
@@ -496,6 +501,7 @@ namespace PersonalLogistics.PlayerInventory
             _itemIdsRequested.Clear();
         }
 
-        public override string SummarizeState() => $"PLM: {_requests.Count} reqs, {_inventoryActions.Count}, {_itemIdsRequested.Count} reqdItems";
+        public override string SummarizeState() =>
+            $"PLM: {_requests.Count} reqs, {_inventoryActions.Count}, {_itemIdsRequested.Count} reqdItems";
     }
 }

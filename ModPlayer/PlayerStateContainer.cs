@@ -21,14 +21,6 @@ namespace PersonalLogistics.ModPlayer
                     return player;
                 }
 
-                if (remote)
-                {
-                    var remotePlayer = new PlogRemotePlayer(playerId);
-                    Log.Debug($"created new remote player for id: {playerId}");
-                    _players[playerId] = remotePlayer;
-                    return remotePlayer;
-                }
-
                 Log.Debug($"Creating new player state for id: {playerId}");
                 var newPlayer = PlogPlayerRegistry.RegisterLocal(playerId);
                 _players[playerId] = newPlayer;
@@ -76,19 +68,19 @@ namespace PersonalLogistics.ModPlayer
 
         public override void ExportData(BinaryWriter w)
         {
-            var plogPlayers = PlayerStateContainer.GetAllPlayers();
-            var remotePlayers = plogPlayers.FindAll(p => p is PlogRemotePlayer)
-                .Select(p => p as PlogRemotePlayer).ToList();
-            Log.Debug($"Writing out {remotePlayers.Count} of {plogPlayers.Count} total players");
-            w.Write(remotePlayers.Count);
-
-            foreach (var plogPlayer in remotePlayers)
-            {
-                PlogPlayerId.Export(plogPlayer.playerId, w);
-                var playerBytes = SerDeManager.ExportRemoteUserData(plogPlayer);
-                w.Write(playerBytes.Length);
-                w.Write(playerBytes);
-            }
+            // var plogPlayers = PlayerStateContainer.GetAllPlayers();
+            // var remotePlayers = plogPlayers.FindAll(p => p is PlogRemotePlayer).Select(p => p as PlogRemotePlayer).ToList();
+            // Log.Debug($"Writing out {remotePlayers.Count} of {plogPlayers.Count} total players");
+            // w.Write(remotePlayers.Count);
+            //
+            // foreach (var plogPlayer in remotePlayers)
+            // {
+            //     PlogPlayerId.Export(plogPlayer.playerId, w);
+            //     var playerBytes = SerDeManager.ExportRemoteUserData(plogPlayer);
+            //     w.Write(playerBytes.Length);
+            //     w.Write(playerBytes);
+            // }
+            throw new NotImplementedException();
         }
 
         public override void ImportData(BinaryReader reader)

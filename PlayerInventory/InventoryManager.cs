@@ -4,8 +4,6 @@ using System.IO;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.Model;
 using PersonalLogistics.ModPlayer;
-using PersonalLogistics.Nebula;
-using PersonalLogistics.Nebula.Client;
 using PersonalLogistics.Scripts;
 using PersonalLogistics.SerDe;
 using PersonalLogistics.Util;
@@ -411,8 +409,6 @@ namespace PersonalLogistics.PlayerInventory
             if (maxValue == 0)
             {
                 BanItem(itemID);
-                if (NebulaLoadState.IsMultiplayerClient())
-                    RequestClient.SendDesiredItemUpdate(itemID, 0, 0);
                 return;
             }
 
@@ -422,10 +418,6 @@ namespace PersonalLogistics.PlayerInventory
             }
 
             desiredInventoryState.AddDesiredItem(itemID, newValue, maxValue);
-            if (NebulaLoadState.IsMultiplayerClient())
-            {
-                RequestClient.SendDesiredItemUpdate(itemID, newValue, maxValue);
-            }
         }
 
         public void Clear()

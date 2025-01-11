@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PersonalLogistics.ModPlayer;
@@ -37,7 +38,7 @@ namespace PersonalLogistics.SerDe
             versions[versionToUse].Export(w);
         }
 
-        public static byte[] ExportRemoteUserData(PlogRemotePlayer player)
+        public static byte[] ExportRemoteUserData(PlogPlayer player)
         {
             var serDeRemoteUserState = new SerDeRemoteUserState(player);
             using var memoryStream = new MemoryStream();
@@ -48,12 +49,13 @@ namespace PersonalLogistics.SerDe
 
         public static PlogPlayer ImportRemoteUser(PlogPlayerId playerId, byte[] playerData)
         {
-            var plogRemotePlayer = new PlogRemotePlayer(playerId);
-            var serDeRemoteUserState = new SerDeRemoteUserState(plogRemotePlayer);
-            using var memoryStream = new MemoryStream(playerData);
-            using var reader = new BinaryReader(memoryStream);
-            serDeRemoteUserState.Import(reader);
-            return plogRemotePlayer;
+            // var plogRemotePlayer = new PlogRemotePlayer(playerId);
+            // var serDeRemoteUserState = new SerDeRemoteUserState(plogRemotePlayer);
+            // using var memoryStream = new MemoryStream(playerData);
+            // using var reader = new BinaryReader(memoryStream);
+            // serDeRemoteUserState.Import(reader);
+            // return plogRemotePlayer;
+            throw new NotImplementedException();
         }
     }
 }

@@ -2,8 +2,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using PersonalLogistics.Nebula;
-using PersonalLogistics.Nebula.Client;
 using PersonalLogistics.Util;
 
 namespace PersonalLogistics.Model
@@ -122,7 +120,6 @@ namespace PersonalLogistics.Model
             {
                 Log.Warn($"tried to remove {itemId} from buffer but there was none in lookup");
                 // since the caller was out of sync on client, host probably is too, sync it up
-                SendUpsertPacket(itemId);
                 return ItemStack.Empty();
             }
 
@@ -130,7 +127,6 @@ namespace PersonalLogistics.Model
             {
                 var removedAmount = inventoryItem.ToItemStack();
                 inventoryItemLookup.TryRemove(inventoryItem.itemId, out _);
-                SendUpsertPacket(itemId);
                 Log.Debug($"Removed {removedAmount.ItemCount} of item from buffer");
                 return removedAmount;
             }
@@ -138,7 +134,6 @@ namespace PersonalLogistics.Model
             var removeAmounts = inventoryItem.ToItemStack().Remove(amountToRemove);
             inventoryItem.count -= removeAmounts.ItemCount;
             inventoryItem.proliferatorPoints -= removeAmounts.ProliferatorPoints;
-            SendUpsertPacket(itemId);
             return removeAmounts;
         }
 
@@ -165,20 +160,6 @@ namespace PersonalLogistics.Model
             {
                 inventoryItemLookup.TryRemove(itemId, out _);
             }
-
-            SendUpsertPacket(itemId);
-        }
-
-        private void SendUpsertPacket(int itemId)
-        {
-            if (!NebulaLoadState.IsMultiplayerClient())
-            {
-                return;
-            }
-
-            if (!inventoryItemLookup.TryGetValue(itemId, out var invItem))
-                RequestClient.NotifyBufferUpsert(itemId, ItemStack.Empty(), GameMain.gameTick);
-            else RequestClient.NotifyBufferUpsert(itemId, invItem.ToItemStack(), GameMain.gameTick);
         }
 
         /// <summary>
@@ -206,7 +187,6 @@ namespace PersonalLogistics.Model
             inventoryItem.count = result.ItemCount;
             inventoryItem.proliferatorPoints = result.ProliferatorPoints;
             inventoryItem.LastUpdated = GameMain.gameTick;
-            SendUpsertPacket(itemId);
             return true;
         }
 

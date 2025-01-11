@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using BepInEx;
 using CommonAPI;
@@ -9,7 +10,6 @@ using HarmonyLib;
 using NebulaAPI;
 using PersonalLogistics.Logistics;
 using PersonalLogistics.ModPlayer;
-using PersonalLogistics.Nebula;
 using PersonalLogistics.PlayerInventory;
 using PersonalLogistics.Scripts;
 using PersonalLogistics.SerDe;
@@ -33,11 +33,11 @@ namespace PersonalLogistics
     [BepInDependency(LDBToolPlugin.MODGUID)]
     [BepInDependency(DSPModSavePlugin.MODGUID)]
     [CommonAPISubmoduleDependency(nameof(ProtoRegistry), nameof(CustomKeyBindSystem), nameof(TabSystem))]
-    public class PersonalLogisticsPlugin : BaseUnityPlugin, IModCanSave, IMultiplayerMod
+    public class PersonalLogisticsPlugin : BaseUnityPlugin, IModCanSave
     {
         private const string PluginGuid = "semarware.dysonsphereprogram.PersonalLogistics";
         private const string PluginName = "PersonalLogistics";
-        private const string PluginVersion = "2.9.8";
+        private const string PluginVersion = "2.9.10";
         private const float InventorySyncInterval = 4.5f;
         private static readonly int VERSION = 2;
 
@@ -68,7 +68,6 @@ namespace PersonalLogistics
             _recycleScript = gameObject.AddComponent<RecycleWindow>();
             Asset.Init(PluginGuid, "pui");
             PlogPlayerRegistry.ClearLocal();
-            NebulaLoadState.Register();
 #if DEBUG
             gameObject.AddComponent<TestPersistence>();
 #else
@@ -90,8 +89,6 @@ namespace PersonalLogistics
                 return;
             }
 
-            NebulaLoadState.instance.RequestStateFromHost();
-            
             if (!LogisticsNetwork.IsInitted)
             {
                 Debug("Starting logistics network");
@@ -316,15 +313,12 @@ namespace PersonalLogistics
             {
                 instance._recycleScript.Unload(false);
             }
-
-            NebulaLoadState.Reset();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GameMain), "Start")]
         public static void OnGameStart()
         {
-            NebulaLoadState.instance = new NebulaLoadState();
         }
 
         [HarmonyPostfix]
