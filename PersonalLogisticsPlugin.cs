@@ -38,7 +38,7 @@ namespace PersonalLogistics
     {
         private const string PluginGuid = "semarware.dysonsphereprogram.PersonalLogistics";
         private const string PluginName = "PersonalLogistics";
-        private const string PluginVersion = "2.11.7";
+        private const string PluginVersion = "2.11.8";
         private const float InventorySyncInterval = 4.5f;
         private static readonly int VERSION = 2;
 
@@ -56,6 +56,8 @@ namespace PersonalLogistics
 
         private void Awake()
         {
+            BlueprintData
+            
             logger = Logger;
             instance = this;
             _harmony = new Harmony(PluginGuid);
